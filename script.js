@@ -409,6 +409,40 @@ async function loadPosts() {
 
         const caption = document.createElement("p");
         caption.textContent = post.caption || "";
+        // Show delete button only to the picture owner
+const { data: { user } } = await client.auth.getUser();
+
+if (user && user.id === post.author_id) {
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "🗑️ Delete Picture";
+    deleteButton.className = "secondary";
+
+    deleteButton.onclick = async () => {
+        if (!confirm("Are you sure you want to delete this picture?")) {
+            return;
+        }
+
+        deleteButton.textContent = "Deleting...";
+        deleteButton.disabled = true;
+
+        const { error } = await client
+            .from("posts")
+            .delete()
+            .eq("id", post.id);
+
+        if (error) {
+            alert("Could not delete picture: " + error.message);
+            deleteButton.disabled = false;
+            deleteButton.textContent = "🗑️ Delete Picture";
+            return;
+        }
+
+        alert("Picture deleted successfully!");
+        loadPosts();
+    };
+
+    card.appendChild(deleteButton);
+}
 
         const comments = document.createElement("div");
         comments.className = "comments";
