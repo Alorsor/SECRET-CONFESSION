@@ -1,0 +1,109 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #16001f, #4b145e, #16001f);
+    color: white;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    padding: 30px 15px;
+    background: #21002e;
+}
+
+header h2 {
+    color: #ff69b4;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+header p {
+    color: #ddd;
+}
+
+main {
+    max-width: 750px;
+    margin: auto;
+    padding: 30px 20px;
+}
+
+.welcome {
+    text-align: center;
+    padding: 65px 20px;
+}
+
+.welcome h1 {
+    font-size: 35px;
+    color: #ff69b4;
+    margin-bottom: 20px;
+}
+
+.welcome p {
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+button {
+    background: #ff69b4;
+    color: white;
+    border: none;
+    padding: 14px 25px;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #e84393;
+}
+
+.confession-box {
+    display: none;
+    background: #2b1038;
+    padding: 25px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.confession-box h2 {
+    color: #ff69b4;
+    margin-bottom: 20px;
+}
+
+textarea, input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+.about {
+    text-align: center;
+    padding: 40px 15px;
+}
+
+.about h2 {
+    color: #ff69b4;
+    margin-bottom: 15px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    background: #21002e;
+    color: #ccc;
+}

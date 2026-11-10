@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Confessions 💌</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h2>💌 Secret Confessions</h2>
+        <p>Your secrets. Your stories. Your freedom.</p>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h1>What's Your Secret? 🤫</h1>
+            <p>Share your thoughts anonymously. Nobody needs to know it's you.</p>
+            <button onclick="showForm()">Share a Confession</button>
+        </section>
+
+        <section id="confessionForm" class="confession-box">
+            <h2>Send Your Confession 💗</h2>
+
+            <textarea id="confession"
+                placeholder="Write your confession here..."></textarea>
+                <label for="photo">📸 Attach a picture (optional)</label>
+
+<input
+    type="file"
+    id="photo"
+    accept="image/jpeg,image/png,image/webp"
+>
+
+            <input type="text" id="nickname"
+                placeholder="Nickname (optional)">
+
+            <button onclick="submitConfession()">Submit Confession</button>
+            <p id="message"></p>
+        </section>
+
+        <section class="about">
+            <h2>A Safe Space for Your Secrets ❤️</h2>
+            <p>Sometimes, sharing what's on your mind makes everything easier.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 Secret Confessions. Share freely. 💌</p>
+    </footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>

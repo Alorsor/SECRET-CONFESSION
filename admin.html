@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret Confessions Admin</title>
+
+<style>
+body {
+    background: #190024;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+h1 {
+    color: #ff69b4;
+    text-align: center;
+}
+
+.box {
+    max-width: 600px;
+    margin: 30px auto;
+    background: #30103d;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+input {
+    width: 95%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    background: #ff69b4;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.confession {
+    background: #451b52;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 10px;
+    overflow-wrap: anywhere;
+}
+
+.hidden {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>💌 Secret Confessions</h1>
+
+<div class="box" id="loginBox">
+    <h2>Administrator Login 🔐</h2>
+
+    <input id="email" type="email" placeholder="Your email">
+
+    <input id="password" type="password" placeholder="Your password">
+
+    <button onclick="login()">Login</button>
+
+    <p id="status"></p>
+</div>
+
+<div class="box hidden" id="dashboard">
+    <h2>Your Confession Inbox 📥</h2>
+
+    <button onclick="loadConfessions()">Refresh Inbox</button>
+    <button onclick="logout()">Logout</button>
+
+    <div id="confessions"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://izdosqdrgghnjadihujs.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ZbUfnH5BeJOO7yRcKgR_fA_2wJxMIjw";
+
+const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const status = document.getElementById("status");
+
+    status.innerText = "Logging in...";
+
+    const { error } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        status.innerText = error.message;
+        return;
+    }
+
+    showDashboard();
+}
+
+async function showDashboard() {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    await loadConfessions();
+}
+
+async function loadConfessions() {
+    const container = document.getElementById("confessions");
+
+    container.innerText = "Loading...";
+
+    const { data, error } = await client
+        .from("confessions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        container.innerText = "Could not load confessions: " + error.message;
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (!data.length) {
+        container.innerText = "No confessions yet.";
+        return;
+    }
+
+    data.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "confession";
+
+        const text = document.createElement("p");
+        text.textContent = item.message;
+
+        const nickname = document.createElement("p");
+        nickname.textContent = "From: " + (item.nickname || "Anonymous");
+
+        const date = document.createElement("small");
+        date.textContent = item.created_at
+            ? new Date(item.created_at).toLocaleString()
+            : "";
+
+        const button = document.createElement("button");
+        button.textContent = "Delete";
+        button.onclick = () => deleteConfession(item.id);
+
+        card.append(text, nickname, date, document.createElement("br"), button);
+        container.appendChild(card);
+    });
+}
+
+async function deleteConfession(id) {
+    if (!confirm("Are you sure you want to delete this confession?")) return;
+
+    const { error } = await client
+        .from("confessions")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    alert("Confession deleted!");
+    loadConfessions();
+}
+
+async function logout() {
+    await client.auth.signOut();
+
+    document.getElementById("dashboard").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
+}
+
+client.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_IN" && session) {
+        showDashboard();
+    }
+});
+</script>
+
+</body>
+</html>
