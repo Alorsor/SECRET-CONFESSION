@@ -431,8 +431,10 @@ if (usernameFromUrl) {
     $("publicLinkPage").classList.remove("hidden");
 
     $("recipientHeading").textContent =
-        "Send an anonymous message to " + usernameFromUrl;
-}
+        "Welcome to " + usernameFromUrl + "'s page! 💗";
+
+    loadPosts();
+}           
 
 
 // START WEBSITE
