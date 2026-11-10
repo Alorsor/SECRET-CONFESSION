@@ -11,9 +11,9 @@ body {
     min-height: 100vh;
 }
 
-header {
+header, footer {
     text-align: center;
-    padding: 30px 15px;
+    padding: 25px 15px;
     background: #21002e;
 }
 
@@ -23,87 +23,134 @@ header h2 {
     margin-bottom: 10px;
 }
 
-header p {
-    color: #ddd;
-}
-
 main {
-    max-width: 750px;
+    max-width: 850px;
     margin: auto;
-    padding: 30px 20px;
+    padding: 24px 16px;
 }
 
 .welcome {
     text-align: center;
-    padding: 65px 20px;
+    padding: 38px 15px;
 }
 
 .welcome h1 {
-    font-size: 35px;
+    font-size: 32px;
     color: #ff69b4;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-.welcome p {
+.welcome p,
+.panel p {
     line-height: 1.6;
-    margin-bottom: 25px;
+    margin: 10px 0 18px;
+}
+
+.panel {
+    background: #2b1038;
+    padding: 22px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.panel h2 {
+    color: #ff69b4;
+    margin-bottom: 14px;
 }
 
 button {
     background: #ff69b4;
     color: white;
-    border: none;
-    padding: 14px 25px;
+    border: 0;
+    padding: 13px 20px;
     border-radius: 25px;
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
     font-weight: bold;
+    margin: 5px 4px 5px 0;
 }
 
 button:hover {
     background: #e84393;
 }
 
-.confession-box {
-    display: none;
-    background: #2b1038;
-    padding: 25px;
-    border-radius: 15px;
-    margin: 20px 0;
+button.secondary {
+    background: #70417e;
 }
 
-.confession-box h2 {
-    color: #ff69b4;
-    margin-bottom: 20px;
-}
-
-textarea, input {
+input,
+textarea {
     width: 100%;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: none;
+    padding: 14px;
+    margin: 8px 0 14px;
+    border: 0;
     border-radius: 10px;
     font-size: 15px;
 }
 
 textarea {
-    height: 150px;
+    min-height: 110px;
     resize: vertical;
 }
 
-.about {
-    text-align: center;
-    padding: 40px 15px;
+label {
+    display: block;
+    margin: 8px 0;
+    color: #ffd6ed;
 }
 
-.about h2 {
-    color: #ff69b4;
-    margin-bottom: 15px;
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.status {
+    color: #ffd6ed;
+    min-height: 20px;
+    overflow-wrap: anywhere;
+}
+
+.post-card {
+    background: #451b52;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 12px;
+    overflow-wrap: anywhere;
+}
+
+.post-card img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: #21002e;
+}
+
+.post-card small {
+    color: #e4cde9;
+    display: block;
+    margin: 8px 0;
+}
+
+.comments {
+    border-top: 1px solid #795383;
+    margin-top: 12px;
+    padding-top: 8px;
+}
+
+.comments p {
+    background: #351442;
+    padding: 9px;
+    border-radius: 8px;
 }
 
 footer {
-    text-align: center;
-    padding: 25px;
-    background: #21002e;
     color: #ccc;
+    margin-top: 25px;
 }

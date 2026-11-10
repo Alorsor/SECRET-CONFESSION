@@ -8,48 +8,98 @@
 </head>
 <body>
 
-    <header>
-        <h2>💌 Secret Confessions</h2>
-        <p>Your secrets. Your stories. Your freedom.</p>
-    </header>
+<header>
+    <h2>💌 Secret Confessions</h2>
+    <p>Your secrets. Your stories. Your freedom.</p>
+</header>
 
-    <main>
+<main>
+
+    <section id="publicLinkPage" class="panel hidden">
+        <h1 id="recipientHeading">Send an anonymous message 🤫</h1>
+        <p>No account needed. Your message is anonymous.</p>
+
+        <textarea id="anonymousMessage"
+            maxlength="2000"
+            placeholder="Write your message..."></textarea>
+
+        <button id="sendAnonymousBtn">Send anonymously</button>
+        <p id="anonymousStatus" class="status"></p>
+    </section>
+
+    <section id="homePage">
+
         <section class="welcome">
-            <h1>What's Your Secret? 🤫</h1>
-            <p>Share your thoughts anonymously. Nobody needs to know it's you.</p>
-            <button onclick="showForm()">Share a Confession</button>
+            <h1>What's on your mind? 🤫</h1>
+            <p>Share secrets, receive messages and post pictures!</p>
         </section>
 
-        <section id="confessionForm" class="confession-box">
-            <h2>Send Your Confession 💗</h2>
+        <section class="panel">
+            <h2>Get Your Personal Link 💗</h2>
+            <p>Choose a username. No email or password required!</p>
 
-            <textarea id="confession"
-                placeholder="Write your confession here..."></textarea>
-                <label for="photo">📸 Attach a picture (optional)</label>
+            <div id="authForms">
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Choose your username"
+                    maxlength="20">
 
-<input
-    type="file"
-    id="photo"
-    accept="image/jpeg,image/png,image/webp"
->
+                <button id="signupBtn">Create My Link</button>
 
-            <input type="text" id="nickname"
-                placeholder="Nickname (optional)">
+                <p id="authStatus" class="status"></p>
+            </div>
 
-            <button onclick="submitConfession()">Submit Confession</button>
-            <p id="message"></p>
+            <div id="accountPanel" class="hidden">
+                <p id="welcomeUser"></p>
+
+                <label>Your personal link:</label>
+                <input id="personalLink" readonly>
+
+                <button id="copyLinkBtn">Copy My Link</button>
+                <button id="shareLinkBtn">Share on WhatsApp</button>
+            </div>
         </section>
 
-        <section class="about">
-            <h2>A Safe Space for Your Secrets ❤️</h2>
-            <p>Sometimes, sharing what's on your mind makes everything easier.</p>
+        <section id="inboxPanel" class="panel hidden">
+            <h2>📥 Your Anonymous Inbox</h2>
+            <button id="refreshInboxBtn">Refresh Inbox</button>
+            <div id="inboxList"></div>
         </section>
-    </main>
 
-    <footer>
-        <p>© 2026 Secret Confessions. Share freely. 💌</p>
-    </footer>
+        <section id="createPostPanel" class="panel hidden">
+            <h2>📸 Share a Picture</h2>
+
+            <textarea id="postCaption"
+                maxlength="1000"
+                placeholder="Write a caption or ask a question..."></textarea>
+
+            <label>Choose a picture:</label>
+            <input type="file" id="postPhoto"
+                accept="image/jpeg,image/png,image/webp">
+
+            <button id="publishPostBtn">Publish Picture</button>
+            <p id="postStatus" class="status"></p>
+        </section>
+
+        <section class="panel">
+            <h2>🌟 Community Picture Posts</h2>
+            <p>Comment anonymously. No account needed.</p>
+
+            <button id="refreshPostsBtn">Refresh Posts</button>
+            <div id="postsList"></div>
+        </section>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 Secret Confessions 💌</p>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+<script src="script.js"></script>
+
 </body>
 </html>
