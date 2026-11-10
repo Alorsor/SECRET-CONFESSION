@@ -77,7 +77,76 @@ async function createAccount() {
     }
 }
 
+// CREATE AN ACCOUNT FROM SOMEONE ELSE'S PERSONAL LINK
+async function createVisitorAccount() {
+    const username = $("visitorUsername").value.trim().toLowerCase();
 
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        showStatus("visitorAccountStatus",
+            "Use 3–20 letters, numbers or underscores.");
+        return;
+    }
+
+    showStatus("visitorAccountStatus", "Creating your personal link...");
+
+    try {
+        let { data: { user }, error: userError } =
+            await client.auth.getUser();
+
+        if (userError) throw userError;
+
+        if (!user) {
+            const { data, error } =
+                await client.auth.signInAnonymously();
+
+            if (error) throw error;
+
+            user = data.user;
+        }
+
+        const { data: existing, error: lookupError } = await client
+            .from("profiles")
+            .select("username")
+            .eq("id", user.id)
+            .maybeSingle();
+
+        if (lookupError) throw lookupError;
+
+        if (existing) {
+            showStatus("visitorAccountStatus",
+                "You already have a personal link: " +
+                location.origin + location.pathname +
+                "?u=" + encodeURIComponent(existing.username));
+            return;
+        }
+
+        const { error } = await client
+            .from("profiles")
+            .insert({
+                id: user.id,
+                username: username
+            });
+
+        if (error) {
+            if (error.code === "23505") {
+                throw new Error("That username is taken. Try another.");
+            }
+            throw error;
+        }
+
+        const personalLink = location.origin + location.pathname +
+            "?u=" + encodeURIComponent(username);
+
+        $("visitorAccountStatus").textContent =
+            "Your personal link is ready! 💗 " + personalLink;
+
+        $("visitorUsername").value = "";
+
+    } catch (error) {
+        console.error(error);
+        showStatus("visitorAccountStatus", error.message);
+    }
+}   
 // SHOW PERSONAL ACCOUNT
 function showAccount(username) {
     $("authForms").classList.add("hidden");
@@ -407,6 +476,7 @@ async function loadPosts() {
 
 // BUTTONS
 $("signupBtn").onclick = createAccount;
+$("createVisitorAccountBtn").onclick = createVisitorAccount;
 $("sendAnonymousBtn").onclick = sendAnonymousMessage;
 $("refreshInboxBtn").onclick = loadInbox;
 $("refreshPostsBtn").onclick = loadPosts;
