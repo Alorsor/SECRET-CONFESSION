@@ -288,16 +288,35 @@ async function publishPost() {
 
 
 // LOAD COMMUNITY POSTS
+// LOAD POSTS FOR THE CURRENT PERSONAL LINK
 async function loadPosts() {
     const box = $("postsList");
+    box.textContent = "Loading pictures...";
 
-    box.textContent = "Loading posts...";
-
-    const { data, error } = await client
+    let query = client
         .from("posts")
-        .select("id, caption, image_url, created_at")
+        .select("id, author_id, caption, image_url, created_at")
         .order("created_at", { ascending: false })
         .limit(50);
+
+    // If someone is viewing a personal link,
+    // show only that owner's pictures.
+    if (usernameFromUrl) {
+        const { data: owner, error: ownerError } = await client
+            .from("profiles")
+            .select("id")
+            .eq("username", usernameFromUrl.toLowerCase())
+            .maybeSingle();
+
+        if (ownerError || !owner) {
+            box.textContent = "This personal link could not be found.";
+            return;
+        }
+
+        query = query.eq("author_id", owner.id);
+    }
+
+    const { data, error } = await query;
 
     box.replaceChildren();
 
@@ -307,7 +326,7 @@ async function loadPosts() {
     }
 
     if (!data.length) {
-        box.textContent = "No picture posts yet.";
+        box.textContent = "No pictures have been published yet.";
         return;
     }
 
@@ -317,10 +336,10 @@ async function loadPosts() {
 
         const image = document.createElement("img");
         image.src = post.image_url;
-        image.alt = "Community picture";
+        image.alt = "Published picture";
 
         const caption = document.createElement("p");
-        caption.textContent = post.caption;
+        caption.textContent = post.caption || "";
 
         const comments = document.createElement("div");
         comments.className = "comments";
@@ -376,7 +395,6 @@ async function loadPosts() {
 
             input.value = "";
             feedback.textContent = "Comment posted!";
-
             loadPosts();
         };
 
@@ -384,6 +402,7 @@ async function loadPosts() {
         box.appendChild(card);
     }
 }
+                   
 
 
 // BUTTONS
