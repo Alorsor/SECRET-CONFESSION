@@ -363,9 +363,10 @@ ctx.fillText("secret-confession-1.onrender.com", 540, 1260);
 
     if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
         await navigator.share({
-            files: [imageFile],
-            title: "Anonymous Message"
-        });
+    files: [imageFile],
+    title: "Anonymous Message",
+    text: "Create your own anonymous messages: https://secret-confession-1.onrender.com"
+});
     } else {
         const link = document.createElement("a");
         link.download = "secret-confession.png";
