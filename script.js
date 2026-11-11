@@ -298,27 +298,44 @@ ctx.roundRect(100, 450, 880, 500, 35);
 ctx.fill();
 
 ctx.restore();
-    // Message
-    ctx.fillStyle = "#481b50";
-    ctx.font = "48px Arial";
-    ctx.textAlign = "center";
+   // NEON GLOW MESSAGE TEXT
+ctx.save();
 
-    const words = item.content.split(" ");
-    let line = "";
-    let y = 570;
+ctx.font = "bold 58px Arial";
+ctx.textAlign = "center";
+ctx.shadowColor = "#ff00cc";
+ctx.shadowBlur = 30;
+ctx.lineWidth = 2;
+ctx.strokeStyle = "#ffffff";
 
-    for (const word of words) {
-        const testLine = line + word + " ";
-        if (ctx.measureText(testLine).width > 740) {
-            ctx.fillText(line, 540, y);
-            line = word + " ";
-            y += 70;
-        } else {
-            line = testLine;
-        }
+const textGradient = ctx.createLinearGradient(200, 0, 880, 0);
+textGradient.addColorStop(0, "#ff00cc");
+textGradient.addColorStop(0.5, "#c084fc");
+textGradient.addColorStop(1, "#00e5ff");
+
+ctx.fillStyle = textGradient;
+
+const words = item.content.split(" ");
+let line = "";
+let y = 570;
+
+for (const word of words) {
+    const testLine = line + word + " ";
+
+    if (ctx.measureText(testLine).width > 740) {
+        ctx.strokeText(line, 540, y);
+        ctx.fillText(line, 540, y);
+        line = word + " ";
+        y += 70;
+    } else {
+        line = testLine;
     }
+}
 
-    ctx.fillText(line, 540, y);
+ctx.strokeText(line, 540, y);
+ctx.fillText(line, 540, y);
+
+ctx.restore();
 
     // Footer
     ctx.fillStyle = "#ffb5dc";
