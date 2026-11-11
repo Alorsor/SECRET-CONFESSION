@@ -303,7 +303,7 @@ ctx.save();
 
 ctx.font = "bold 58px Arial";
 ctx.textAlign = "center";
-ctx.shadowColor = "#ff00cc";
+ctx.shadowColor = "#001aff";
 ctx.shadowBlur = 30;
 ctx.lineWidth = 2;
 ctx.strokeStyle = "#ffffff";
