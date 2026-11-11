@@ -262,7 +262,7 @@ async function loadInbox() {
         const shareButton = document.createElement("button");
 shareButton.textContent = "🎨 Create & Share Message Card";
 
-shareButton.onclick = async () => {
+shareButton.onclick = async () 
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
     canvas.height = 1350;
