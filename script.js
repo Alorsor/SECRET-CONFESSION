@@ -662,3 +662,35 @@ if (usernameFromUrl) {
 // START WEBSITE
 loadPosts();
 restoreAccount();
+// SHARE A PICTURE DIRECTLY TO WHATSAPP STATUS
+$("statusShareBtn").onclick = async () => {
+    const file = $("statusPhoto").files[0];
+
+    if (!file) {
+        showStatus("statusShareMessage", "Please choose a picture first.");
+        return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+        showStatus("statusShareMessage", "Please choose an image.");
+        return;
+    }
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({
+                files: [file],
+                title: "Share to WhatsApp Status"
+            });
+        } catch (error) {
+            if (error.name !== "AbortError") {
+                showStatus("statusShareMessage", "Sharing failed. Please try again.");
+            }
+        }
+    } else {
+        showStatus(
+            "statusShareMessage",
+            "Your browser does not support direct picture sharing. Please try Chrome."
+        );
+    }
+};
