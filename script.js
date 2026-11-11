@@ -209,7 +209,8 @@ async function sendAnonymousMessage() {
         "submit_anonymous_message",
         {
             p_username: usernameFromUrl,
-            p_content: content
+            p_content: content,
+           
         }
     );
 
@@ -382,70 +383,90 @@ ctx.fillText("secret-confession-1.onrender.com", 540, 1260);
 }
 
 // PUBLISH A PICTURE
-async function publishPost() {
-    const file = $("postPhoto").files[0];
-    const caption = $("postCaption").value.trim();
+async function loadInbox() {
+    const box = $("inboxList");
+    box.textContent = "Loading messages...";
 
-    if (!file) {
-        showStatus("postStatus", "Please choose a picture.");
+    const { data, error } = await client
+        .from("messages")
+        .select("id, content, created_at, post_id")
+        .order("created_at", { ascending: false });
+
+    box.replaceChildren();
+
+    if (error) {
+        box.textContent = error.message;
         return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-        showStatus("postStatus", "Picture must be smaller than 5 MB.");
+    if (!data.length) {
+        box.textContent = "No messages yet. Share your link!";
         return;
     }
 
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-        showStatus("postStatus", "Choose JPG, PNG or WEBP.");
-        return;
+    for (const item of data) {
+        const card = document.createElement("article");
+        card.className = "post-card";
+
+        // Show the original picture if this message is linked to one.
+        if (item.post_id) {
+            const { data: post, error: postError } = await client
+                .from("posts")
+                .select("image_url, caption")
+                .eq("id", item.post_id)
+                .maybeSingle();
+
+            if (!postError && post) {
+                const picture = document.createElement("img");
+                picture.src = post.image_url;
+                picture.alt = "Picture this message is about";
+                card.appendChild(picture);
+
+                if (post.caption) {
+                    const caption = document.createElement("p");
+                    caption.textContent = post.caption;
+                    card.appendChild(caption);
+                }
+            }
+        }
+
+        const message = document.createElement("p");
+        message.textContent = "💌 " + item.content;
+
+        const date = document.createElement("small");
+        date.textContent =
+            new Date(item.created_at).toLocaleString();
+
+        const shareButton = document.createElement("button");
+        shareButton.textContent = "📲 Share on WhatsApp Status";
+
+        shareButton.onclick = async () => {
+            const shareText =
+                "Someone sent me an anonymous message 💌\n\n" +
+                '"' + item.content + '"' +
+                "\n\nShared from Secret Confessions ❤️";
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: "Anonymous Message",
+                        text: shareText
+                    });
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        alert("Sharing was unsuccessful. Please try again.");
+                    }
+                }
+            } else {
+                await navigator.clipboard.writeText(shareText);
+                alert("Message copied! Paste it into your WhatsApp Status.");
+            }
+        };
+
+        card.append(message, date, shareButton);
+        box.appendChild(card);
     }
-
-    const { data: { user } } = await client.auth.getUser();
-
-    if (!user) {
-        showStatus("postStatus", "Please create your username first.");
-        return;
-    }
-
-    showStatus("postStatus", "Uploading picture...");
-
-    try {
-        const path = user.id + "/" + crypto.randomUUID() +
-            "-" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-
-        const { error: uploadError } = await client.storage
-            .from("community-posts")
-            .upload(path, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = client.storage
-            .from("community-posts")
-            .getPublicUrl(path);
-
-        const { error } = await client
-            .from("posts")
-            .insert({
-                author_id: user.id,
-                caption: caption,
-                image_url: urlData.publicUrl
-            });
-
-        if (error) throw error;
-
-        $("postCaption").value = "";
-        $("postPhoto").value = "";
-
-        showStatus("postStatus", "Your picture is now published! ❤️");
-
-        loadPosts();
-
-    } catch (error) {
-        showStatus("postStatus", error.message);
-    }
-}
-
+} 
 
 // LOAD COMMUNITY POSTS
 // LOAD POSTS FOR THE CURRENT PERSONAL LINK
@@ -459,8 +480,7 @@ async function loadPosts() {
         .order("created_at", { ascending: false })
         .limit(50);
 
-    // If someone is viewing a personal link,
-    // show only that owner's pictures.
+    // Show only the owner's pictures on a personal link.
     if (usernameFromUrl) {
         const { data: owner, error: ownerError } = await client
             .from("profiles")
@@ -492,7 +512,7 @@ async function loadPosts() {
 
     for (const post of data) {
         const card = document.createElement("article");
-        card.className = "post-card inbox-message-card";
+        card.className = "post-card";
 
         const image = document.createElement("img");
         image.src = post.image_url;
@@ -500,68 +520,98 @@ async function loadPosts() {
 
         const caption = document.createElement("p");
         caption.textContent = post.caption || "";
-        // SHARE PICTURE PAGE
-const shareButton = document.createElement("button");
-shareButton.textContent = "📲 Share Picture on WhatsApp";
 
-shareButton.onclick = async () => {
-    const { data: owner } = await client
-        .from("profiles")
-        .select("username")
-        .eq("id", post.author_id)
-        .single();
+        card.append(image, caption);
 
-    if (!owner) {
-        alert("Could not find the picture owner's link.");
-        return;
-    }
+        // Private anonymous message about this picture.
+        if (usernameFromUrl) {
+            const privateInput = document.createElement("textarea");
+            privateInput.maxLength = 2000;
+            privateInput.placeholder =
+                "Send a private anonymous message about this picture...";
 
-    const link = location.origin + location.pathname +
-        "?u=" + encodeURIComponent(owner.username);
+            const privateButton = document.createElement("button");
+            privateButton.textContent =
+                "🔒 Send Private Anonymous Message";
 
-    const shareText =
-        "Look at my picture and send me an anonymous message! 🤫📸\n" + link;
+            const privateFeedback = document.createElement("p");
+            privateFeedback.className = "status";
 
-    location.href = "https://wa.me/?text=" +
-        encodeURIComponent(shareText);
-};
+            privateButton.onclick = async () => {
+                const content = privateInput.value.trim();
 
-card.appendChild(shareButton);
-        // Show delete button only to the picture owner
-const { data: { user } } = await client.auth.getUser();
+                if (!content) {
+                    privateFeedback.textContent = "Write a message first.";
+                    return;
+                }
 
-if (user && user.id === post.author_id) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "🗑️ Delete Picture";
-    deleteButton.className = "secondary";
+                privateFeedback.textContent = "Sending privately...";
+                privateButton.disabled = true;
 
-    deleteButton.onclick = async () => {
-        if (!confirm("Are you sure you want to delete this picture?")) {
-            return;
+                const { error } = await client.rpc(
+                    "submit_anonymous_message",
+                    {
+                        p_username: usernameFromUrl,
+                        p_content: content,
+                        p_post_id: post.id
+                    }
+                );
+
+                privateButton.disabled = false;
+
+                if (error) {
+                    privateFeedback.textContent = error.message;
+                    return;
+                }
+
+                privateInput.value = "";
+                privateFeedback.textContent =
+                    "Your private anonymous message has been sent! ❤️";
+            };
+
+            card.append(
+                privateInput,
+                privateButton,
+                privateFeedback
+            );
         }
 
-        deleteButton.textContent = "Deleting...";
-        deleteButton.disabled = true;
+        // Show delete button only to the picture owner.
+        const { data: { user } } = await client.auth.getUser();
 
-        const { error } = await client
-            .from("posts")
-            .delete()
-            .eq("id", post.id);
-
-        if (error) {
-            alert("Could not delete picture: " + error.message);
-            deleteButton.disabled = false;
+        if (user && user.id === post.author_id) {
+            const deleteButton = document.createElement("button");
             deleteButton.textContent = "🗑️ Delete Picture";
-            return;
+            deleteButton.className = "secondary";
+
+            deleteButton.onclick = async () => {
+                if (!confirm("Are you sure you want to delete this picture?")) {
+                    return;
+                }
+
+                deleteButton.textContent = "Deleting...";
+                deleteButton.disabled = true;
+
+                const { error } = await client
+                    .from("posts")
+                    .delete()
+                    .eq("id", post.id);
+
+                if (error) {
+                    alert("Could not delete picture: " + error.message);
+                    deleteButton.disabled = false;
+                    deleteButton.textContent = "🗑️ Delete Picture";
+                    return;
+                }
+
+                alert("Picture deleted successfully!");
+                loadPosts();
+            };
+
+            card.appendChild(deleteButton);
         }
 
-        alert("Picture deleted successfully!");
-        loadPosts();
-    };
-
-    card.appendChild(deleteButton);
-}
-
+        // Existing public comments.
         const comments = document.createElement("div");
         comments.className = "comments";
 
@@ -619,7 +669,7 @@ if (user && user.id === post.author_id) {
             loadPosts();
         };
 
-        card.append(image, caption, comments, input, button, feedback);
+        card.append(comments, input, button, feedback);
         box.appendChild(card);
     }
 }
