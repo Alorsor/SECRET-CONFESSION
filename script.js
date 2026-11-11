@@ -283,13 +283,23 @@ shareButton.onclick = async () => {
     ctx.fill();
 
     // Heading
-    ctx.fillStyle = "#ff65b5";
+    ctx.fillStyle = "#d8a5ff;
     ctx.textAlign = "center";
     ctx.font = "bold 58px Arial";
     ctx.fillText("💌 SECRET CONFESSIONS", 540, 350);
+// Golden message panel
+ctx.save();
+ctx.shadowColor = "#ffcc33";
+ctx.shadowBlur = 35;
+ctx.fillStyle = "#ffe36e";
 
+ctx.beginPath();
+ctx.roundRect(100, 450, 880, 500, 35);
+ctx.fill();
+
+ctx.restore();
     // Message
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#481b50";
     ctx.font = "48px Arial";
     ctx.textAlign = "center";
 
