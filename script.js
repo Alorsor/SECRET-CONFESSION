@@ -6,7 +6,7 @@
 const SUPABASE_URL = "https://izdosqdrgghnjadihujs.supabase.co";
 
 // Keep your existing Supabase publishable key.
-const SUPABASE_KEY = "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
+const SUPABASE_KEY = "sb_publishable_ZbUfnH5BeJOO7yRcKgR_f_A_2wJxMIjw";
 
 const client = window.supabase.createClient(
     SUPABASE_URL,
