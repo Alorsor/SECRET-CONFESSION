@@ -27,11 +27,12 @@ function makePersonalLink(username) {
     return location.origin + location.pathname +
         "?u=" + encodeURIComponent(username);
 }
-
 async function getCurrentUser() {
-    const { data, error } = await client.auth.getUser();
+    const { data, error } = await client.auth.getSession();
+
     if (error) throw error;
-    return data.user;
+
+    return data.session?.user || null;
 }
 
 
