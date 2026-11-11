@@ -262,7 +262,7 @@ async function loadInbox() {
         const shareButton = document.createElement("button");
 shareButton.textContent = "🎨 Create & Share Message Card";
 
-shareButton.onclick = async () 
+shareButton.onclick = async () => {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
     canvas.height = 1350;
@@ -283,7 +283,7 @@ shareButton.onclick = async ()
     ctx.fill();
 
     // Heading
-    ctx.fillStyle = "#d8a5ff;
+    ctx.fillStyle = "#d8a5ff";
     ctx.textAlign = "center";
     ctx.font = "bold 58px Arial";
     ctx.fillText("💌 SECRET CONFESSIONS", 540, 350);
