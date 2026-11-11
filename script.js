@@ -340,8 +340,16 @@ ctx.restore();
     // Footer
     ctx.fillStyle = "#ffb5dc";
     ctx.font = "32px Arial";
-    ctx.fillText("Someone sent you an anonymous message ❤️", 540, 980);
-    ctx.fillText("Secret Confessions", 540, 1150);
+   ctx.fillText("Someone sent you an anonymous message ❤️", 540, 980);
+ctx.fillText("Secret Confessions", 540, 1120);
+
+ctx.font = "bold 34px Arial";
+ctx.fillStyle = "#ffe36e";
+ctx.fillText("Create your own anonymous messages!", 540, 1200);
+
+ctx.font = "26px Arial";
+ctx.fillStyle = "#ffffff";
+ctx.fillText("secret-confession-1.onrender.com", 540, 1260);
 
     const blob = await new Promise(resolve =>
         canvas.toBlob(resolve, "image/png")
