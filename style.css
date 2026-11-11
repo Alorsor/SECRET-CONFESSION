@@ -154,3 +154,31 @@ footer {
     color: #ccc;
     margin-top: 25px;
 }
+.inbox-message-card {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin: 15px 0;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.inbox-message-card:nth-child(5n + 1) {
+    background: linear-gradient(135deg, #6c3bd1, #a855f7);
+}
+
+.inbox-message-card:nth-child(5n + 2) {
+    background: linear-gradient(135deg, #be185d, #fb7185);
+}
+
+.inbox-message-card:nth-child(5n + 3) {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+}
+
+.inbox-message-card:nth-child(5n + 4) {
+    background: linear-gradient(135deg, #047857, #34d399);
+}
+
+.inbox-message-card:nth-child(5n) {
+    background: linear-gradient(135deg, #c2410c, #fb923c);
+}

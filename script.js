@@ -456,7 +456,7 @@ async function loadPosts() {
 
     for (const post of data) {
         const card = document.createElement("article");
-        card.className = "post-card";
+        card.className = "post-card inbox-message-card";
 
         const image = document.createElement("img");
         image.src = post.image_url;
