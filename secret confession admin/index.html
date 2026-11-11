@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Confessions Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>🔐 Secret Confessions Admin</h1>
+    <p>Administrator Dashboard</p>
+
+    <div id="loginSection">
+        <h2>Admin Login</h2>
+        <input type="email" id="email" placeholder="Admin email">
+        <br><br>
+        <input type="password" id="password" placeholder="Password">
+        <br><br>
+        <button id="loginBtn">Login</button>
+        <p id="status"></p>
+    </div>
+
+    <div id="dashboard" hidden>
+        <h2>Welcome, Admin!</h2>
+        <button id="logoutBtn">Logout</button>
+        <div id="adminContent"></div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+</body>
+</html>

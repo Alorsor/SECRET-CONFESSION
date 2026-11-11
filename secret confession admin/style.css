@@ -1,0 +1,51 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 30px 15px;
+    font-family: Arial, sans-serif;
+    background: #160d24;
+    color: white;
+}
+
+h1, h2 {
+    color: #ff70b8;
+}
+
+#loginSection, #dashboard {
+    max-width: 600px;
+    margin: 35px auto;
+    padding: 25px;
+    background: #28183b;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px #0005;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #684477;
+    border-radius: 8px;
+    background: #160d24;
+    color: white;
+}
+
+button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    background: #ff70b8;
+    color: #160d24;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #ffa1d0;
+}
+
+#status {
+    color: #ffb5d8;
+}
