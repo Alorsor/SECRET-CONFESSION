@@ -500,6 +500,33 @@ async function loadPosts() {
 
         const caption = document.createElement("p");
         caption.textContent = post.caption || "";
+        // SHARE PICTURE PAGE
+const shareButton = document.createElement("button");
+shareButton.textContent = "📲 Share Picture on WhatsApp";
+
+shareButton.onclick = async () => {
+    const { data: owner } = await client
+        .from("profiles")
+        .select("username")
+        .eq("id", post.author_id)
+        .single();
+
+    if (!owner) {
+        alert("Could not find the picture owner's link.");
+        return;
+    }
+
+    const link = location.origin + location.pathname +
+        "?u=" + encodeURIComponent(owner.username);
+
+    const shareText =
+        "Look at my picture and send me an anonymous message! 🤫📸\n" + link;
+
+    location.href = "https://wa.me/?text=" +
+        encodeURIComponent(shareText);
+};
+
+card.appendChild(shareButton);
         // Show delete button only to the picture owner
 const { data: { user } } = await client.auth.getUser();
 
