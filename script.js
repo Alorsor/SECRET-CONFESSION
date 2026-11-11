@@ -260,31 +260,86 @@ async function loadInbox() {
             new Date(item.created_at).toLocaleString();
 
         const shareButton = document.createElement("button");
-        shareButton.textContent = "📲 Share on WhatsApp Status";
+shareButton.textContent = "🎨 Create & Share Message Card";
 
-        shareButton.onclick = async () => {
-            const shareText =
-                "Someone sent me an anonymous message 💌\n\n" +
-                '"' + item.content + '"' +
-                "\n\nShared from Secret Confessions ❤️";
+shareButton.onclick = async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1350;
 
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: "Anonymous Message",
-                        text: shareText
-                    });
-                } catch (error) {
-                    if (error.name !== "AbortError") {
-                        alert("Sharing was unsuccessful. Please try again.");
-                    }
-                }
-            } else {
-                await navigator.clipboard.writeText(shareText);
-                alert("Message copied! Paste it into your WhatsApp Status.");
-            }
-        };
+    const ctx = canvas.getContext("2d");
 
+    // Background
+    const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
+    gradient.addColorStop(0, "#250b35");
+    gradient.addColorStop(1, "#6b1d68");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1080, 1350);
+
+    // Card
+    ctx.fillStyle = "#481b50";
+    ctx.beginPath();
+    ctx.roundRect(90, 220, 900, 850, 45);
+    ctx.fill();
+
+    // Heading
+    ctx.fillStyle = "#ff65b5";
+    ctx.textAlign = "center";
+    ctx.font = "bold 58px Arial";
+    ctx.fillText("💌 SECRET CONFESSIONS", 540, 350);
+
+    // Message
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "48px Arial";
+    ctx.textAlign = "center";
+
+    const words = item.content.split(" ");
+    let line = "";
+    let y = 570;
+
+    for (const word of words) {
+        const testLine = line + word + " ";
+        if (ctx.measureText(testLine).width > 740) {
+            ctx.fillText(line, 540, y);
+            line = word + " ";
+            y += 70;
+        } else {
+            line = testLine;
+        }
+    }
+
+    ctx.fillText(line, 540, y);
+
+    // Footer
+    ctx.fillStyle = "#ffb5dc";
+    ctx.font = "32px Arial";
+    ctx.fillText("Someone sent you an anonymous message ❤️", 540, 980);
+    ctx.fillText("Secret Confessions", 540, 1150);
+
+    const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, "image/png")
+    );
+
+    const imageFile = new File(
+        [blob],
+        "secret-confession.png",
+        { type: "image/png" }
+    );
+
+    if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+        await navigator.share({
+            files: [imageFile],
+            title: "Anonymous Message"
+        });
+    } else {
+        const link = document.createElement("a");
+        link.download = "secret-confession.png";
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        alert("Your message card has been downloaded. You can upload it to WhatsApp Status.");
+    }
+};
         card.append(message, date, shareButton);
         box.appendChild(card);
     });
