@@ -712,35 +712,69 @@ if (usernameFromUrl) {
 // START WEBSITE
 loadPosts();
 restoreAccount();
-// SHARE A PICTURE DIRECTLY TO WHATSAPP STATUS
-$("statusShareBtn").onclick = async () => {
-    const file = $("statusPhoto").files[0];
+// SHARE A PICTURE TO WHATSAPP STATUS
+const statusShareBtn = document.getElementById("statusShareBtn");
 
-    if (!file) {
-        showStatus("statusShareMessage", "Please choose a picture first.");
-        return;
-    }
+if (statusShareBtn) {
+    statusShareBtn.addEventListener("click", async () => {
+        const photoInput = document.getElementById("statusPhoto");
+        const statusMessage = document.getElementById("statusShareMessage");
+        const file = photoInput.files[0];
 
-    if (!file.type.startsWith("image/")) {
-        showStatus("statusShareMessage", "Please choose an image.");
-        return;
-    }
+        if (!file) {
+            statusMessage.textContent = "Please choose a picture first.";
+            return;
+        }
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        if (!file.type.startsWith("image/")) {
+            statusMessage.textContent = "Please select a valid picture.";
+            return;
+        }
+
         try {
-            await navigator.share({
-                files: [file],
-                title: "Share to WhatsApp Status"
-            });
+            const shareFile = new File(
+                [file],
+                file.name,
+                { type: file.type }
+            );
+
+            if (
+                navigator.share &&
+                navigator.canShare &&
+                navigator.canShare({ files: [shareFile] })
+            ) {
+                await navigator.share({
+                    files: [shareFile],
+                    title: "Share a Picture",
+                    text: "Sharing from Secret Confessions ❤️"
+                });
+
+                statusMessage.textContent =
+                    "Choose WhatsApp, then select My Status.";
+            } else {
+                const url = URL.createObjectURL(file);
+                const link = document.createElement("a");
+
+                link.href = url;
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                statusMessage.textContent =
+                    "Picture downloaded. Open WhatsApp Status and upload it.";
+            }
+
         } catch (error) {
-            if (error.name !== "AbortError") {
-                showStatus("statusShareMessage", "Sharing failed. Please try again.");
+            if (error.name === "AbortError") {
+                statusMessage.textContent = "Sharing cancelled.";
+            } else {
+                console.error(error);
+                statusMessage.textContent =
+                    "Sharing failed. Please try again.";
             }
         }
-    } else {
-        showStatus(
-            "statusShareMessage",
-            "Your browser does not support direct picture sharing. Please try Chrome."
-        );
-    }
-};
+    });
+}
