@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8910559823070736"
-     crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#250b35">
     <title>Secret Confessions 💌</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <header>
@@ -17,42 +17,51 @@
 
 <main>
 
-   <section id="publicLinkPage" class="panel hidden">
+    <!-- PERSONAL LINK PAGE -->
+    <section id="publicLinkPage" class="panel hidden">
 
-    <h1 id="recipientHeading">Welcome! 💗</h1>
+        <h1 id="recipientHeading">Welcome! 💗</h1>
 
-    <h2>📸 Pictures published by this person</h2>
-    <div id="postsList"></div>
+        <h2>📸 Pictures published by this person</h2>
+        <div id="personalPostsList"></div>
 
-    <h2>Send an anonymous message 🤫</h2>
-    <p>No account needed. Your message is anonymous.</p>
+        <h2>Send an anonymous message 🤫</h2>
+        <p>No account needed. Your message is anonymous.</p>
 
-    <textarea id="anonymousMessage"
-        maxlength="2000"
-        placeholder="Write your message..."></textarea>
+        <textarea
+            id="anonymousMessage"
+            maxlength="2000"
+            placeholder="Write your message..."
+        ></textarea>
 
-    <button id="sendAnonymousBtn">Send anonymously</button>
+        <button id="sendAnonymousBtn">
+            Send anonymously
+        </button>
 
-    <p id="anonymousStatus" class="status"></p>
-<hr>
+        <p id="anonymousStatus" class="status"></p>
 
-<h2>💗 Want to receive anonymous messages too?</h2>
+        <hr>
 
-<p>Create your own personal link for free!</p>
+        <h2>💗 Want to receive anonymous messages too?</h2>
+        <p>Create your own personal link for free!</p>
 
-<input
-    type="text"
-    id="visitorUsername"
-    placeholder="Choose your own username"
-    maxlength="20">
+        <input
+            type="text"
+            id="visitorUsername"
+            placeholder="Choose your own username"
+            maxlength="20"
+        >
 
-<button id="createVisitorAccountBtn">
-    Create My Own Personal Link
-</button>
+        <button id="createVisitorAccountBtn">
+            Create My Own Personal Link
+        </button>
 
-<p id="visitorAccountStatus" class="status"></p>   
-</section>             
+        <p id="visitorAccountStatus" class="status"></p>
 
+    </section>
+
+
+    <!-- HOME PAGE -->
     <section id="homePage">
 
         <section class="welcome">
@@ -60,88 +69,29 @@
             <p>Share secrets, receive messages and post pictures!</p>
         </section>
 
+
+        <!-- CREATE PERSONAL LINK -->
         <section class="panel">
+
             <h2>Get Your Personal Link 💗</h2>
             <p>Choose a username. No email or password required!</p>
 
             <div id="authForms">
+
                 <input
                     type="text"
                     id="username"
                     placeholder="Choose your username"
-                    maxlength="20">
+                    maxlength="20"
+                >
 
-                <button id="signupBtn">Create My Link</button>
+                <button id="signupBtn">
+                    Create My Link
+                </button>
 
                 <p id="authStatus" class="status"></p>
+
             </div>
 
-            <div id="accountPanel" class="hidden">
-                <p id="welcomeUser"></p>
 
-                <label>Your personal link:</label>
-                <input id="personalLink" readonly>
- 
-                <button type="button" id="copyLinkBtn" onclick="copyPersonalLink()">Copy My Link</button>
-<button type="button" id="shareLinkBtn" onclick="sharePersonalLink()">Share on WhatsApp</button>
-            </div>
-        </section>
-
-        <section id="inboxPanel" class="panel hidden">
-            <h2>📥 Your Anonymous Inbox</h2>
-            <button id="refreshInboxBtn">Refresh Inbox</button>
-            <div id="inboxList"></div>
-        </section>
-
-        <section id="createPostPanel" class="panel hidden">
-            <h2>📸 Share a Picture</h2>
-           <hr>
-
-<h2>📱 Upload Directly to WhatsApp Status</h2>
-<p>Choose a picture from your phone and share it on your WhatsApp Status.</p>
-
-<input
-    type="file"
-    id="statusPhoto"
-    accept="image/*"
->
-
-<button id="statusShareBtn">
-    📲 Upload to WhatsApp Status
-</button>
-
-<p id="statusShareMessage" class="status"></p>
-
-            <textarea id="postCaption"
-                maxlength="1000"
-                placeholder="Write a caption or ask a question..."></textarea>
-
-            <label>Choose a picture:</label>
-            <input type="file" id="postPhoto"
-                accept="image/jpeg,image/png,image/webp">
-
-            <button id="publishPostBtn">Publish Picture</button>
-            <p id="postStatus" class="status"></p>
-        </section>
-
-        <section class="panel">
-            <h2>🌟 Community Picture Posts</h2>
-            <p>Comment anonymously. No account needed.</p>
-
-            <button id="refreshPostsBtn">Refresh Posts</button>
-            <div id="postsList"></div>
-        </section>
-
-    </section>
-
-</main>
-
-<footer>
-    <p>© 2026 Secret Confessions 💌</p>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
-
-</body>
-</html>
+            <!--

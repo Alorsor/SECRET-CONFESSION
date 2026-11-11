@@ -1,12 +1,10 @@
-// =====================================================
-// SECRET CONFESSIONS - MAIN SCRIPT
-// =====================================================
+// ==========================================
+// SECRET CONFESSIONS — SUPABASE CONNECTION
+// ==========================================
 
-// SUPABASE CONNECTION
 const SUPABASE_URL = "https://izdosqdrgghnjadihujs.supabase.co";
 
-// Keep your existing Supabase publishable key.
-const SUPABASE_KEY = "sb_publishable_ZbUfnH5BeJOO7yRcKgR_f_A_2wJxMIjw";
+const SUPABASE_KEY = "sb_publishable_ZbUfnH5BeJOO7yRcKgR_fA_2wJxMIjw";
 
 const client = window.supabase.createClient(
     SUPABASE_URL,
@@ -23,42 +21,60 @@ function showStatus(id, message) {
     if (element) element.textContent = message;
 }
 
-function makePersonalLink(username) {
+function makeElement(tag, text, className) {
+    const element = document.createElement(tag);
+
+    if (text !== undefined) {
+        element.textContent = text;
+    }
+
+    if (className) {
+        element.className = className;
+    }
+
+    return element;
+}
+
+function getPersonalLink(username) {
     return location.origin + location.pathname +
         "?u=" + encodeURIComponent(username);
 }
-async function getCurrentUser() {
-    const { data, error } = await client.auth.getSession();
-
-    if (error) throw error;
-
-    return data.session?.user || null;
-}
 
 
-// =====================================================
-// CREATE USERNAME AND PRIVATE ACCOUNT
-// =====================================================
+// ==========================================
+// CREATE PERSONAL ACCOUNT
+// ==========================================
+
 async function createAccount() {
-    const username = $("username")?.value.trim().toLowerCase();
+    const username = $("username").value.trim().toLowerCase();
 
-    if (!username || !/^[a-z0-9_]{3,20}$/.test(username)) {
-        showStatus("authStatus",
-            "Use 3–20 letters, numbers or underscores.");
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        showStatus(
+            "authStatus",
+            "Use 3–20 letters, numbers or underscores."
+        );
         return;
     }
 
     showStatus("authStatus", "Creating your personal link...");
 
     try {
-        let user = await getCurrentUser();
+        let { data: { user }, error: userError } =
+            await client.auth.getUser();
+
+        if (userError) throw userError;
 
         if (!user) {
             const { data, error } =
                 await client.auth.signInAnonymously();
 
             if (error) throw error;
+
             user = data.user;
+        }
+
+        if (!user) {
+            throw new Error("Could not create your account. Please try again.");
         }
 
         const { data: existing, error: lookupError } = await client
@@ -83,42 +99,55 @@ async function createAccount() {
 
         if (error) {
             if (error.code === "23505") {
-                throw new Error("That username is already taken. Choose another.");
+                throw new Error(
+                    "That username is already taken. Choose another."
+                );
             }
+
             throw error;
         }
 
         showAccount(username);
 
     } catch (error) {
-        console.error(error);
+        console.error("Account creation error:", error);
         showStatus("authStatus", error.message);
     }
 }
 
 
-// =====================================================
-// CREATE AN ACCOUNT FROM SOMEONE ELSE'S PERSONAL LINK
-// =====================================================
-async function createVisitorAccount() {
-    const username = $("visitorUsername")?.value.trim().toLowerCase();
+// ==========================================
+// CREATE ACCOUNT FROM A VISITOR PAGE
+// ==========================================
 
-    if (!username || !/^[a-z0-9_]{3,20}$/.test(username)) {
-        showStatus("visitorAccountStatus",
-            "Use 3–20 letters, numbers or underscores.");
+async function createVisitorAccount() {
+    const username = $("visitorUsername").value.trim().toLowerCase();
+
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        showStatus(
+            "visitorAccountStatus",
+            "Use 3–20 letters, numbers or underscores."
+        );
         return;
     }
 
-    showStatus("visitorAccountStatus", "Creating your personal link...");
+    showStatus(
+        "visitorAccountStatus",
+        "Creating your personal link..."
+    );
 
     try {
-        let user = await getCurrentUser();
+        let { data: { user }, error: userError } =
+            await client.auth.getUser();
+
+        if (userError) throw userError;
 
         if (!user) {
             const { data, error } =
                 await client.auth.signInAnonymously();
 
             if (error) throw error;
+
             user = data.user;
         }
 
@@ -134,7 +163,7 @@ async function createVisitorAccount() {
             showStatus(
                 "visitorAccountStatus",
                 "You already have a personal link: " +
-                makePersonalLink(existing.username)
+                getPersonalLink(existing.username)
             );
             return;
         }
@@ -148,28 +177,34 @@ async function createVisitorAccount() {
 
         if (error) {
             if (error.code === "23505") {
-                throw new Error("That username is taken. Try another.");
+                throw new Error(
+                    "That username is taken. Try another."
+                );
             }
+
             throw error;
         }
 
+        const link = getPersonalLink(username);
+
         showStatus(
             "visitorAccountStatus",
-            "Your personal link is ready! 💗 " + makePersonalLink(username)
+            "Your personal link is ready! 💗 " + link
         );
 
         $("visitorUsername").value = "";
 
     } catch (error) {
-        console.error(error);
+        console.error("Visitor account error:", error);
         showStatus("visitorAccountStatus", error.message);
     }
 }
 
 
-// =====================================================
+// ==========================================
 // SHOW PERSONAL ACCOUNT
-// =====================================================
+// ==========================================
+
 function showAccount(username) {
     $("authForms")?.classList.add("hidden");
     $("accountPanel")?.classList.remove("hidden");
@@ -182,16 +217,17 @@ function showAccount(username) {
     }
 
     if ($("personalLink")) {
-        $("personalLink").value = makePersonalLink(username);
+        $("personalLink").value = getPersonalLink(username);
     }
 
     loadInbox();
 }
 
 
-// =====================================================
-// RESTORE ACCOUNT WHEN WEBSITE OPENS
-// =====================================================
+// ==========================================
+// RESTORE ACCOUNT
+// ==========================================
+
 async function restoreAccount() {
     try {
         const { data: { session }, error: sessionError } =
@@ -200,7 +236,10 @@ async function restoreAccount() {
         if (sessionError) throw sessionError;
         if (!session) return;
 
-        const user = await getCurrentUser();
+        const { data: { user }, error: userError } =
+            await client.auth.getUser();
+
+        if (userError) throw userError;
         if (!user) return;
 
         const { data, error } = await client
@@ -211,23 +250,25 @@ async function restoreAccount() {
 
         if (error) throw error;
 
-        if (data) showAccount(data.username);
+        if (data) {
+            showAccount(data.username);
+        }
 
     } catch (error) {
-        console.error(error);
+        console.error("Account restoration error:", error);
     }
 }
 
 
-// =====================================================
+// ==========================================
 // SEND GENERAL ANONYMOUS MESSAGE
-// =====================================================
+// ==========================================
+
 async function sendAnonymousMessage() {
-    const content = $("anonymousMessage")?.value.trim();
+    const content = $("anonymousMessage").value.trim();
 
     if (!usernameFromUrl) {
-        showStatus("anonymousStatus",
-            "Open someone's personal link first.");
+        showStatus("anonymousStatus", "This personal link is invalid.");
         return;
     }
 
@@ -251,162 +292,22 @@ async function sendAnonymousMessage() {
 
         $("anonymousMessage").value = "";
 
-        showStatus("anonymousStatus",
-            "Your anonymous message has been sent! 💗");
+        showStatus(
+            "anonymousStatus",
+            "Your anonymous message has been sent! 💗"
+        );
 
     } catch (error) {
-        console.error(error);
+        console.error("Message error:", error);
         showStatus("anonymousStatus", error.message);
     }
 }
 
 
-// =====================================================
-// CREATE A MESSAGE CARD FOR SHARING
-// =====================================================
-async function createMessageCard(item, post) {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1350;
-
-    const ctx = canvas.getContext("2d");
-
-    if (!ctx) {
-        throw new Error("Your browser could not create the message card.");
-    }
-
-    const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
-    gradient.addColorStop(0, "#250b35");
-    gradient.addColorStop(1, "#6b1d68");
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 1080, 1350);
-
-    ctx.fillStyle = "#481b50";
-    ctx.beginPath();
-    ctx.roundRect(60, 70, 960, 1210, 45);
-    ctx.fill();
-
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#ffb5dc";
-    ctx.font = "bold 58px Arial";
-    ctx.fillText("SECRET CONFESSIONS", 540, 155);
-
-    let messageTop = 360;
-
-    // Add the original picture if the message belongs to a picture.
-    if (post && post.image_url) {
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-        image.src = post.image_url;
-
-        await new Promise((resolve, reject) => {
-            image.onload = resolve;
-            image.onerror = () => reject(
-                new Error("The original picture could not be loaded.")
-            );
-        });
-
-        const maxWidth = 820;
-        const maxHeight = 430;
-
-        const scale = Math.min(
-            maxWidth / image.width,
-            maxHeight / image.height
-        );
-
-        const width = image.width * scale;
-        const height = image.height * scale;
-
-        ctx.drawImage(
-            image,
-            (1080 - width) / 2,
-            205 + (maxHeight - height) / 2,
-            width,
-            height
-        );
-
-        messageTop = 710;
-    }
-
-    ctx.fillStyle = "#ffe36e";
-    ctx.beginPath();
-    ctx.roundRect(105, messageTop, 870, 390, 35);
-    ctx.fill();
-
-    ctx.fillStyle = "#481b50";
-    ctx.font = "bold 48px Arial";
-    ctx.textAlign = "center";
-
-    const words = String(item.content || "").split(/\s+/);
-    const lines = [];
-    let line = "";
-
-    for (const word of words) {
-        const test = line ? line + " " + word : word;
-
-        if (ctx.measureText(test).width > 760 && line) {
-            lines.push(line);
-            line = word;
-        } else {
-            line = test;
-        }
-    }
-
-    if (line) lines.push(line);
-
-    const visibleLines = lines.slice(0, 5);
-    const lineHeight = 62;
-
-    const startY = messageTop + 195 -
-        ((visibleLines.length - 1) * lineHeight) / 2;
-
-    visibleLines.forEach((text, index) => {
-        ctx.fillText(text, 540, startY + index * lineHeight);
-    });
-
-    ctx.fillStyle = "#ffb5dc";
-    ctx.font = "30px Arial";
-    ctx.fillText(
-        "Someone sent an anonymous message ❤️",
-        540,
-        1165
-    );
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 34px Arial";
-    ctx.fillText(
-        "Create your own anonymous messages!",
-        540,
-        1220
-    );
-
-    ctx.font = "26px Arial";
-    ctx.fillText(
-        "secret-confession-1.onrender.com",
-        540,
-        1255
-    );
-
-    const blob = await new Promise(resolve =>
-        canvas.toBlob(resolve, "image/png")
-    );
-
-    if (!blob) {
-        throw new Error("Could not create the message image.");
-    }
-
-    return new File(
-        [blob],
-        "secret-confession.png",
-        { type: "image/png" }
-    );
-}
-
-
-// =====================================================
+// ==========================================
 // LOAD PRIVATE INBOX
-// =====================================================
+// ==========================================
+
 async function loadInbox() {
     const box = $("inboxList");
 
@@ -417,7 +318,7 @@ async function loadInbox() {
     try {
         const { data, error } = await client
             .from("messages")
-            .select("id, content, created_at, post_id")
+            .select("id, content, created_at")
             .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -425,122 +326,68 @@ async function loadInbox() {
         box.replaceChildren();
 
         if (!data || data.length === 0) {
-            box.textContent = "No messages yet. Share your link!";
+            box.textContent =
+                "No messages yet. Share your personal link!";
             return;
         }
 
-        for (const item of data) {
-            const card = document.createElement("article");
-            card.className = "post-card";
+        data.forEach(item => {
+            const card = makeElement("article", undefined, "post-card");
 
-            let linkedPost = null;
+            const message = makeElement("p", item.content);
 
-            if (item.post_id) {
-                const { data: post, error: postError } = await client
-                    .from("posts")
-                    .select("image_url, caption")
-                    .eq("id", item.post_id)
-                    .maybeSingle();
+            const date = makeElement(
+                "small",
+                new Date(item.created_at).toLocaleString()
+            );
 
-                if (!postError && post) {
-                    linkedPost = post;
-
-                    const picture = document.createElement("img");
-                    picture.src = post.image_url;
-                    picture.alt = "Picture this message is about";
-
-                    card.appendChild(picture);
-
-                    if (post.caption) {
-                        const caption = document.createElement("p");
-                        caption.textContent = post.caption;
-                        card.appendChild(caption);
-                    }
-                }
-            }
-
-            const message = document.createElement("p");
-            message.textContent = "💌 " + item.content;
-
-            const date = document.createElement("small");
-            date.textContent =
-                new Date(item.created_at).toLocaleString();
-
-            const shareButton = document.createElement("button");
-            shareButton.type = "button";
-            shareButton.textContent = "🎨 Create & Share Message Card";
+            const shareButton = makeElement(
+                "button",
+                "📲 Share on WhatsApp Status"
+            );
 
             shareButton.onclick = async () => {
-                shareButton.disabled = true;
-                shareButton.textContent = "Preparing card...";
+                const shareText =
+                    "Someone sent me an anonymous message 💌\n\n" +
+                    '"' + item.content + '"' +
+                    "\n\nShared from Secret Confessions ❤️";
 
                 try {
-                    const imageFile =
-                        await createMessageCard(item, linkedPost);
-
-                    if (
-                        navigator.share &&
-                        navigator.canShare &&
-                        navigator.canShare({ files: [imageFile] })
-                    ) {
+                    if (navigator.share) {
                         await navigator.share({
-                            files: [imageFile],
                             title: "Anonymous Message",
-                            text:
-                                "Create your own anonymous messages: " +
-                                "https://secret-confession-1.onrender.com"
+                            text: shareText
                         });
                     } else {
-                        const url = URL.createObjectURL(imageFile);
-                        const link = document.createElement("a");
-
-                        link.href = url;
-                        link.download = imageFile.name;
-
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-
-                        setTimeout(
-                            () => URL.revokeObjectURL(url),
-                            1500
-                        );
-
+                        await navigator.clipboard.writeText(shareText);
                         alert(
-                            "Your message card has been downloaded. " +
-                            "Upload it to WhatsApp Status."
+                            "Message copied! Paste it into your WhatsApp Status."
                         );
                     }
-
                 } catch (error) {
                     if (error.name !== "AbortError") {
-                        console.error(error);
-                        alert(error.message ||
-                            "Could not share the message card.");
+                        alert("Sharing failed. Please try again.");
                     }
-                } finally {
-                    shareButton.disabled = false;
-                    shareButton.textContent =
-                        "🎨 Create & Share Message Card";
                 }
             };
 
             card.append(message, date, shareButton);
             box.appendChild(card);
-        }
+        });
 
     } catch (error) {
-        console.error(error);
-        box.textContent = error.message || "Could not load your messages.";
+        console.error("Inbox error:", error);
+        box.textContent = error.message;
     }
 }
 
 
-// =====================================================
+// ==========================================
 // PUBLISH A PICTURE
-// =====================================================
+// ==========================================
+
 async function publishPost() {
-    const file = $("postPhoto")?.files?.[0];
+    const file = $("postPhoto")?.files[0];
     const caption = $("postCaption")?.value.trim() || "";
 
     if (!file) {
@@ -549,8 +396,7 @@ async function publishPost() {
     }
 
     if (file.size > 5 * 1024 * 1024) {
-        showStatus("postStatus",
-            "Picture must be smaller than 5 MB.");
+        showStatus("postStatus", "Picture must be smaller than 5 MB.");
         return;
     }
 
@@ -560,11 +406,16 @@ async function publishPost() {
     }
 
     try {
-        const user = await getCurrentUser();
+        const { data: { user }, error: userError } =
+            await client.auth.getUser();
+
+        if (userError) throw userError;
 
         if (!user) {
-            showStatus("postStatus",
-                "Please create your username first.");
+            showStatus(
+                "postStatus",
+                "Please create your username first."
+            );
             return;
         }
 
@@ -601,24 +452,64 @@ async function publishPost() {
         $("postCaption").value = "";
         $("postPhoto").value = "";
 
-        showStatus("postStatus",
-            "Your picture is now published! ❤️");
+        showStatus(
+            "postStatus",
+            "Your picture is now published! ❤️"
+        );
 
         await loadPosts();
 
     } catch (error) {
-        console.error(error);
-        showStatus("postStatus",
-            error.message || "Picture could not be published.");
+        console.error("Publish error:", error);
+        showStatus("postStatus", error.message);
     }
 }
 
 
-// =====================================================
-// LOAD COMMUNITY POSTS AND PERSONAL-LINK POSTS
-// =====================================================
+// ==========================================
+// SEND A PRIVATE MESSAGE ABOUT A POST
+// ==========================================
+
+async function sendPostMessage(username, postId, input, feedback) {
+    const content = input.value.trim();
+
+    if (!content) {
+        feedback.textContent = "Please write a message.";
+        return;
+    }
+
+    feedback.textContent = "Sending...";
+
+    try {
+        const { error } = await client.rpc(
+            "submit_anonymous_message",
+            {
+                p_username: username,
+                p_content: content,
+                p_post_id: postId
+            }
+        );
+
+        if (error) throw error;
+
+        input.value = "";
+        feedback.textContent = "Your private message was sent! 💗";
+
+    } catch (error) {
+        console.error("Post message error:", error);
+        feedback.textContent = error.message;
+    }
+}
+
+
+// ==========================================
+// LOAD POSTS
+// ==========================================
+
 async function loadPosts() {
-    const box = $("postsList");
+    const box = usernameFromUrl
+        ? $("personalPostsList")
+        : $("postsList");
 
     if (!box) return;
 
@@ -631,6 +522,8 @@ async function loadPosts() {
             .order("created_at", { ascending: false })
             .limit(50);
 
+        let ownerId = null;
+
         if (usernameFromUrl) {
             const { data: owner, error: ownerError } = await client
                 .from("profiles")
@@ -641,12 +534,12 @@ async function loadPosts() {
             if (ownerError) throw ownerError;
 
             if (!owner) {
-                box.textContent =
-                    "This personal link could not be found.";
+                box.textContent = "This personal link could not be found.";
                 return;
             }
 
-            query = query.eq("author_id", owner.id);
+            ownerId = owner.id;
+            query = query.eq("author_id", ownerId);
         }
 
         const { data, error } = await query;
@@ -656,183 +549,133 @@ async function loadPosts() {
         box.replaceChildren();
 
         if (!data || data.length === 0) {
-            box.textContent =
-                "No pictures have been published yet.";
+            box.textContent = "No pictures have been published yet.";
             return;
         }
 
-        const currentUser = await getCurrentUser();
+        const { data: { user } } = await client.auth.getUser();
 
         for (const post of data) {
-            const card = document.createElement("article");
-            card.className = "post-card";
+            const card = makeElement(
+                "article",
+                undefined,
+                "post-card"
+            );
 
-            const image = document.createElement("img");
+            const image = makeElement("img");
             image.src = post.image_url;
             image.alt = "Published picture";
+            image.loading = "lazy";
 
-            const caption = document.createElement("p");
-            caption.textContent = post.caption || "";
+            const caption = makeElement(
+                "p",
+                post.caption || ""
+            );
 
-            card.append(image, caption);
+            const date = makeElement(
+                "small",
+                new Date(post.created_at).toLocaleString()
+            );
 
-            // PRIVATE ANONYMOUS MESSAGE ABOUT THIS PICTURE
-            if (usernameFromUrl) {
-                const privateInput =
-                    document.createElement("textarea");
+            card.append(image, caption, date);
 
-                privateInput.maxLength = 2000;
-                privateInput.placeholder =
-                    "Send a private anonymous message about this picture...";
-
-                const privateButton =
-                    document.createElement("button");
-
-                privateButton.type = "button";
-                privateButton.textContent =
-                    "🔒 Send Private Anonymous Message";
-
-                const privateFeedback =
-                    document.createElement("p");
-
-                privateFeedback.className = "status";
-
-                privateButton.onclick = async () => {
-                    const content = privateInput.value.trim();
-
-                    if (!content) {
-                        privateFeedback.textContent =
-                            "Write a message first.";
-                        return;
-                    }
-
-                    privateFeedback.textContent =
-                        "Sending privately...";
-
-                    privateButton.disabled = true;
-
-                    try {
-                        const { error } = await client.rpc(
-                            "submit_anonymous_message",
-                            {
-                                p_username: usernameFromUrl,
-                                p_content: content,
-                                p_post_id: post.id
-                            }
-                        );
-
-                        if (error) throw error;
-
-                        privateInput.value = "";
-                        privateFeedback.textContent =
-                            "Your private anonymous message has been sent! ❤️";
-
-                    } catch (error) {
-                        console.error(error);
-                        privateFeedback.textContent =
-                            error.message || "Message could not be sent.";
-
-                    } finally {
-                        privateButton.disabled = false;
-                    }
-                };
-
-                card.append(
-                    privateInput,
-                    privateButton,
-                    privateFeedback
+            // Delete button for the owner only.
+            if (user && user.id === post.author_id) {
+                const deleteButton = makeElement(
+                    "button",
+                    "🗑️ Delete Picture",
+                    "secondary"
                 );
-            }
-
-            // DELETE BUTTON ONLY FOR THE PICTURE OWNER
-            if (currentUser && currentUser.id === post.author_id) {
-                const deleteButton =
-                    document.createElement("button");
-
-                deleteButton.type = "button";
-                deleteButton.textContent = "🗑️ Delete Picture";
-                deleteButton.className = "secondary";
 
                 deleteButton.onclick = async () => {
-                    if (!confirm(
-                        "Are you sure you want to delete this picture?"
-                    )) {
+                    if (!confirm("Are you sure you want to delete this picture?")) {
                         return;
                     }
 
-                    deleteButton.textContent = "Deleting...";
                     deleteButton.disabled = true;
+                    deleteButton.textContent = "Deleting...";
 
-                    try {
-                        const { error } = await client
-                            .from("posts")
-                            .delete()
-                            .eq("id", post.id);
+                    const { error: deleteError } = await client
+                        .from("posts")
+                        .delete()
+                        .eq("id", post.id);
 
-                        if (error) throw error;
-
-                        alert("Picture deleted successfully!");
-                        await loadPosts();
-
-                    } catch (error) {
-                        console.error(error);
+                    if (deleteError) {
                         alert(
-                            "Could not delete picture: " + error.message
+                            "Could not delete picture: " +
+                            deleteError.message
                         );
 
                         deleteButton.disabled = false;
-                        deleteButton.textContent =
-                            "🗑️ Delete Picture";
+                        deleteButton.textContent = "🗑️ Delete Picture";
+                        return;
                     }
+
+                    await loadPosts();
                 };
 
                 card.appendChild(deleteButton);
             }
 
-            // EXISTING PUBLIC COMMENTS
-            const comments = document.createElement("div");
-            comments.className = "comments";
+            // Comments section.
+            const comments = makeElement(
+                "div",
+                undefined,
+                "comments"
+            );
 
-            const result = await client
-                .from("post_comments")
-                .select("comment")
-                .eq("post_id", post.id)
-                .order("created_at");
+            const { data: commentRows, error: commentError } =
+                await client
+                    .from("post_comments")
+                    .select("comment")
+                    .eq("post_id", post.id)
+                    .order("created_at", { ascending: true });
 
-            if (result.error) {
+            if (commentError) {
                 comments.textContent = "Comments unavailable.";
+            } else if (commentRows.length === 0) {
+                comments.textContent = "No comments yet.";
             } else {
-                result.data.forEach(row => {
-                    const p = document.createElement("p");
-                    p.textContent = "💬 " + row.comment;
-                    comments.appendChild(p);
+                commentRows.forEach(row => {
+                    const comment = makeElement(
+                        "p",
+                        "💬 " + row.comment
+                    );
+
+                    comments.appendChild(comment);
                 });
             }
 
-            const input = document.createElement("textarea");
-            input.maxLength = 1000;
-            input.placeholder = "Write an anonymous comment...";
+            const commentInput = makeElement("textarea");
+            commentInput.maxLength = 1000;
+            commentInput.placeholder =
+                "Write an anonymous comment...";
 
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = "Comment anonymously";
+            const commentButton = makeElement(
+                "button",
+                "Comment anonymously"
+            );
 
-            const feedback = document.createElement("p");
-            feedback.className = "status";
+            const commentFeedback = makeElement(
+                "p",
+                "",
+                "status"
+            );
 
-            button.onclick = async () => {
-                const comment = input.value.trim();
+            commentButton.onclick = async () => {
+                const comment = commentInput.value.trim();
 
                 if (!comment) {
-                    feedback.textContent = "Write a comment first.";
+                    commentFeedback.textContent =
+                        "Write a comment first.";
                     return;
                 }
 
-                feedback.textContent = "Posting...";
-                button.disabled = true;
+                commentButton.disabled = true;
+                commentFeedback.textContent = "Posting...";
 
                 try {
-                    const { error } = await client.rpc(
+                    const { error: submitError } = await client.rpc(
                         "submit_post_comment",
                         {
                             p_post_id: post.id,
@@ -840,192 +683,221 @@ async function loadPosts() {
                         }
                     );
 
-                    if (error) throw error;
+                    if (submitError) throw submitError;
 
-                    input.value = "";
-                    feedback.textContent = "Comment posted!";
+                    commentInput.value = "";
+                    commentFeedback.textContent = "Comment posted!";
+
                     await loadPosts();
 
                 } catch (error) {
-                    console.error(error);
-                    feedback.textContent =
-                        error.message || "Comment could not be posted.";
-
-                } finally {
-                    button.disabled = false;
+                    commentFeedback.textContent = error.message;
+                    commentButton.disabled = false;
                 }
             };
 
-            card.append(comments, input, button, feedback);
+            card.append(
+                comments,
+                commentInput,
+                commentButton,
+                commentFeedback
+            );
+
+            // Private message form appears on personal pages only.
+            if (usernameFromUrl) {
+                const privateHeading = makeElement(
+                    "h4",
+                    "Send a private message about this picture 💌"
+                );
+
+                const privateInput = makeElement("textarea");
+                privateInput.maxLength = 2000;
+                privateInput.placeholder =
+                    "Write your private anonymous message...";
+
+                const privateButton = makeElement(
+                    "button",
+                    "Send private message"
+                );
+
+                const privateFeedback = makeElement(
+                    "p",
+                    "",
+                    "status"
+                );
+
+                privateButton.onclick = async () => {
+                    privateButton.disabled = true;
+
+                    await sendPostMessage(
+                        usernameFromUrl,
+                        post.id,
+                        privateInput,
+                        privateFeedback
+                    );
+
+                    privateButton.disabled = false;
+                };
+
+                card.append(
+                    privateHeading,
+                    privateInput,
+                    privateButton,
+                    privateFeedback
+                );
+            }
+
             box.appendChild(card);
         }
 
     } catch (error) {
-        console.error(error);
-        box.textContent =
-            error.message || "Could not load pictures.";
+        console.error("Load posts error:", error);
+        box.textContent = error.message;
     }
 }
 
 
-// =====================================================
-// COPY PERSONAL LINK
-// =====================================================
-async function copyPersonalLink() {
-    const linkInput = $("personalLink");
-    const link = linkInput?.value.trim();
+// ==========================================
+// SHARE A PHOTO TO WHATSAPP STATUS
+// ==========================================
 
-    if (!link) {
-        alert("Your personal link is not ready yet.");
-        return;
-    }
-
-    try {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(link);
-        } else {
-            linkInput.focus();
-            linkInput.select();
-
-            const copied = document.execCommand("copy");
-
-            if (!copied) {
-                throw new Error(
-                    "Copy is not supported by this browser."
-                );
-            }
-        }
-
-        alert("Your link has been copied!");
-
-    } catch (error) {
-        console.error(error);
-        prompt("Copy your personal link:", link);
-    }
-}
-
-
-// =====================================================
-// SHARE PERSONAL LINK THROUGH WHATSAPP
-// =====================================================
-function sharePersonalLink() {
-    const link = $("personalLink")?.value.trim();
-
-    if (!link) {
-        alert("Your personal link is not ready yet.");
-        return;
-    }
-
-    const message =
-        "Send me an anonymous message: " + link;
-
-    const whatsappUrl =
-        "https://wa.me/?text=" + encodeURIComponent(message);
-
-    window.open(whatsappUrl, "_blank", "noopener");
-}
-
-
-// =====================================================
-// SHARE A SELECTED PICTURE TO WHATSAPP STATUS
-// =====================================================
-async function shareSelectedPictureToStatus() {
-    const photoInput = $("statusPhoto");
-    const statusMessage = $("statusShareMessage");
-    const file = photoInput?.files?.[0];
-
-    if (!statusMessage) return;
+async function shareStatusPhoto() {
+    const file = $("statusPhoto")?.files[0];
 
     if (!file) {
-        statusMessage.textContent =
-            "Please choose a picture first.";
+        showStatus(
+            "statusShareMessage",
+            "Please choose a picture first."
+        );
         return;
     }
 
     if (!file.type.startsWith("image/")) {
-        statusMessage.textContent =
-            "Please select a valid picture.";
+        showStatus(
+            "statusShareMessage",
+            "Please choose an image file."
+        );
         return;
     }
 
     try {
-        const shareFile = new File(
-            [file],
-            file.name,
-            { type: file.type }
+        showStatus(
+            "statusShareMessage",
+            "Preparing your picture..."
         );
+
+        const shareData = {
+            files: [file],
+            title: "Secret Confessions",
+            text: "Shared from Secret Confessions ❤️"
+        };
 
         if (
             navigator.share &&
             navigator.canShare &&
-            navigator.canShare({ files: [shareFile] })
+            navigator.canShare({ files: [file] })
         ) {
-            await navigator.share({
-                files: [shareFile],
-                title: "Share a Picture",
-                text: "Sharing from Secret Confessions ❤️"
-            });
+            await navigator.share(shareData);
 
-            statusMessage.textContent =
-                "Choose WhatsApp, then select My Status.";
-
-        } else {
-            const url = URL.createObjectURL(file);
-            const link = document.createElement("a");
-
-            link.href = url;
-            link.download = file.name;
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            setTimeout(
-                () => URL.revokeObjectURL(url),
-                1500
+            showStatus(
+                "statusShareMessage",
+                "Choose WhatsApp Status in the sharing options."
             );
+        } else {
+            const downloadLink = document.createElement("a");
 
-            statusMessage.textContent =
-                "Picture downloaded. Open WhatsApp Status and upload it.";
+            downloadLink.href = URL.createObjectURL(file);
+            downloadLink.download = file.name || "status-photo.jpg";
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            downloadLink.remove();
+
+            URL.revokeObjectURL(downloadLink.href);
+
+            showStatus(
+                "statusShareMessage",
+                "Picture downloaded. Open WhatsApp and add it to your Status."
+            );
         }
 
     } catch (error) {
-        if (error.name === "AbortError") {
-            statusMessage.textContent = "Sharing cancelled.";
-        } else {
-            console.error(error);
-            statusMessage.textContent =
-                error.message || "Sharing failed. Please try again.";
+        if (error.name !== "AbortError") {
+            console.error("Photo sharing error:", error);
+
+            showStatus(
+                "statusShareMessage",
+                "Could not share the picture. Please try again."
+            );
         }
     }
 }
 
 
-// =====================================================
-// CONNECT BUTTONS
-// =====================================================
-function connectButton(id, handler) {
+// ==========================================
+// BUTTONS AND EVENT LISTENERS
+// ==========================================
+
+function connectButton(id, action) {
     const button = $(id);
 
     if (button) {
-        button.addEventListener("click", handler);
+        button.addEventListener("click", action);
     }
 }
 
 connectButton("signupBtn", createAccount);
-connectButton("createVisitorAccountBtn", createVisitorAccount);
-connectButton("sendAnonymousBtn", sendAnonymousMessage);
+
+connectButton(
+    "createVisitorAccountBtn",
+    createVisitorAccount
+);
+
+connectButton(
+    "sendAnonymousBtn",
+    sendAnonymousMessage
+);
+
 connectButton("refreshInboxBtn", loadInbox);
+
 connectButton("refreshPostsBtn", loadPosts);
+
 connectButton("publishPostBtn", publishPost);
-connectButton("copyLinkBtn", copyPersonalLink);
-connectButton("shareLinkBtn", sharePersonalLink);
-connectButton("statusShareBtn", shareSelectedPictureToStatus);
+
+connectButton("statusShareBtn", shareStatusPhoto);
 
 
-// =====================================================
-// OPEN PERSONAL MESSAGE PAGE
-// =====================================================
+// Copy personal link.
+connectButton("copyLinkBtn", async () => {
+    try {
+        await navigator.clipboard.writeText(
+            $("personalLink").value
+        );
+
+        alert("Your link has been copied!");
+
+    } catch (error) {
+        alert("Could not copy the link. Please copy it manually.");
+    }
+});
+
+
+// Share personal link through WhatsApp.
+connectButton("shareLinkBtn", () => {
+    const link = $("personalLink").value;
+
+    const text =
+        "Send me an anonymous message: " + link;
+
+    location.href =
+        "https://wa.me/?text=" + encodeURIComponent(text);
+});
+
+
+// ==========================================
+// OPEN PERSONAL LINK PAGE
+// ==========================================
+
 if (usernameFromUrl) {
     $("homePage")?.classList.add("hidden");
     $("publicLinkPage")?.classList.remove("hidden");
@@ -1037,8 +909,13 @@ if (usernameFromUrl) {
 }
 
 
-// =====================================================
+// ==========================================
 // START WEBSITE
-// =====================================================
-loadPosts();
-restoreAccount();
+// ==========================================
+
+async function startWebsite() {
+    await restoreAccount();
+    await loadPosts();
+}
+
+startWebsite();

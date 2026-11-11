@@ -1,232 +1,303 @@
+/* =================================
+   SECRET CONFESSIONS - MAIN STYLE
+================================= */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #16001f, #4b145e, #16001f);
-    color: white;
-    min-height: 100vh;
+:root {
+    --background: #190024;
+    --panel: #30103d;
+    --panel-light: #451b52;
+    --pink: #ff69b4;
+    --pink-light: #ff8acb;
+    --white: #ffffff;
+    --yellow: #ffd166;
+    --muted: #e8d9ed;
 }
 
-header, footer {
+body {
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(145deg, #3d104d, #190024);
+    color: var(--white);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* HEADER */
+
+header {
     text-align: center;
     padding: 25px 15px;
-    background: #21002e;
+    background: rgba(25, 0, 36, 0.55);
 }
 
 header h2 {
-    color: #ff69b4;
-    font-size: 28px;
-    margin-bottom: 10px;
+    color: var(--pink);
+    font-size: 27px;
 }
 
-main {
-    max-width: 850px;
-    margin: auto;
-    padding: 24px 16px;
+header p {
+    color: var(--muted);
+    margin-top: 5px;
 }
+
+/* MAIN CONTENT */
+
+main {
+    width: 100%;
+    max-width: 850px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+/* WELCOME SECTION */
 
 .welcome {
     text-align: center;
-    padding: 38px 15px;
+    padding: 25px 15px;
+    margin-bottom: 20px;
 }
 
 .welcome h1 {
+    color: var(--pink-light);
     font-size: 32px;
-    color: #ff69b4;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
 }
 
-.welcome p,
-.panel p {
-    line-height: 1.6;
-    margin: 10px 0 18px;
+.welcome p {
+    font-size: 18px;
+    color: var(--muted);
 }
+
+/* PANELS */
 
 .panel {
-    background: #2b1038;
-    padding: 22px;
-    border-radius: 15px;
+    background: var(--panel);
+    padding: 25px;
     margin: 20px 0;
+    border-radius: 22px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.panel h1,
+.panel h2 {
+    color: var(--pink);
+    margin-bottom: 12px;
+}
+
+.panel h1 {
+    font-size: 30px;
 }
 
 .panel h2 {
-    color: #ff69b4;
-    margin-bottom: 14px;
+    font-size: 25px;
 }
 
-button {
-    background: #ff69b4;
-    color: white;
-    border: 0;
-    padding: 13px 20px;
-    border-radius: 25px;
-    font-size: 15px;
-    cursor: pointer;
-    font-weight: bold;
-    margin: 5px 4px 5px 0;
+.panel p {
+    color: var(--muted);
+    margin-bottom: 15px;
 }
 
-button:hover {
-    background: #e84393;
-}
-
-button.secondary {
-    background: #70417e;
-}
-
-input,
-textarea {
-    width: 100%;
-    padding: 14px;
-    margin: 8px 0 14px;
-    border: 0;
-    border-radius: 10px;
-    font-size: 15px;
-}
-
-textarea {
-    min-height: 110px;
-    resize: vertical;
-}
-
-label {
-    display: block;
-    margin: 8px 0;
-    color: #ffd6ed;
-}
-
-.button-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
+/* HIDDEN ELEMENTS */
 
 .hidden {
     display: none !important;
 }
 
-.status {
-    color: #ffd6ed;
-    min-height: 20px;
-    overflow-wrap: anywhere;
-}
+/* INPUTS */
 
-.post-card {
-    background: #451b52;
+input,
+textarea {
+    display: block;
+    width: 100%;
     padding: 15px;
     margin: 15px 0;
+    border: 2px solid transparent;
     border-radius: 12px;
+    background: #ffffff;
+    color: #222222;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--pink);
+}
+
+input[type="file"] {
+    background: #f5eaf7;
+    color: #222222;
+}
+
+input[readonly] {
+    background: #f1e8f4;
+}
+
+/* LABELS */
+
+label {
+    display: block;
+    margin-top: 12px;
+    color: var(--muted);
+    font-weight: bold;
+}
+
+/* BUTTONS */
+
+button {
+    display: inline-block;
+    padding: 13px 22px;
+    margin: 8px 5px 8px 0;
+    border: none;
+    border-radius: 35px;
+    background: var(--pink);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+button:hover {
+    background: var(--pink-light);
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* STATUS MESSAGES */
+
+.status {
+    min-height: 24px;
+    margin-top: 12px;
+    font-weight: bold;
+    color: var(--yellow);
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 25px 0;
+}
+
+/* ACCOUNT PANEL */
+
+#accountPanel {
+    margin-top: 20px;
+}
+
+#welcomeUser {
+    color: var(--pink-light);
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* POSTS AND INBOX CARDS */
+
+.post-card {
+    background: var(--panel-light);
+    padding: 18px;
+    margin: 18px 0;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.post-card p {
+    white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 
 .post-card img {
+    display: block;
     width: 100%;
-    max-height: 480px;
+    max-height: 450px;
     object-fit: contain;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    background: #21002e;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    background: #190024;
 }
 
 .post-card small {
-    color: #e4cde9;
     display: block;
-    margin: 8px 0;
+    color: #d8bfdc;
+    margin: 10px 0;
 }
 
-.comments {
-    border-top: 1px solid #795383;
-    margin-top: 12px;
-    padding-top: 8px;
+/* COMMENTS */
+
+.comment {
+    background: rgba(25, 0, 36, 0.45);
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
 }
 
-.comments p {
-    background: #351442;
-    padding: 9px;
-    border-radius: 8px;
+.comment p {
+    margin-bottom: 5px;
 }
+
+/* FOOTER */
 
 footer {
-    color: #ccc;
-    margin-top: 25px;
-}
-.inbox-message-card {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 16px;
-    padding: 18px;
-    margin: 15px 0;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    padding: 25px 15px;
+    color: var(--muted);
+    background: rgba(25, 0, 36, 0.65);
+    margin-top: 35px;
 }
 
-.inbox-message-card:nth-child(5n + 1) {
-    background: linear-gradient(135deg, #6c3bd1, #a855f7);
-}
+/* MOBILE RESPONSIVENESS */
 
-.inbox-message-card:nth-child(5n + 2) {
-    background: linear-gradient(135deg, #be185d, #fb7185);
-}
+@media (max-width: 600px) {
 
-.inbox-message-card:nth-child(5n + 3) {
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-}
+    main {
+        padding: 10px;
+        margin: 15px auto;
+    }
 
-.inbox-message-card:nth-child(5n + 4) {
-    background: linear-gradient(135deg, #047857, #34d399);
-}
+    .panel {
+        padding: 20px;
+        border-radius: 18px;
+    }
 
-.inbox-message-card:nth-child(5n) {
-    background: linear-gradient(135deg, #c2410c, #fb923c);
-}
-/* COLOURFUL TEXT DESIGN */
+    .welcome h1 {
+        font-size: 27px;
+    }
 
-/* Main headings */
-h1, h2, h3 {
-    background: linear-gradient(
-        90deg,
-        #ff69b4,
-        #c084fc,
-        #60a5fa,
-        #ffd166
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
+    .welcome p {
+        font-size: 16px;
+    }
 
-/* Paragraph text */
-p {
-    color: #fce7ff;
-}
+    .panel h1 {
+        font-size: 26px;
+    }
 
-/* Welcome message */
-.welcome p {
-    color: #ffd6f5;
-}
+    .panel h2 {
+        font-size: 22px;
+    }
 
-/* Labels */
-label {
-    color: #ffb6e6;
-    font-weight: bold;
-}
-
-/* Status messages */
-.status {
-    color: #ffd166;
-    font-weight: bold;
-}
-
-/* Personal username */
-#welcomeUser {
-    color: #ff9de2;
-    font-weight: bold;
-}
-
-/* Footer text */
-footer {
-    color: #d8b4fe;
+    button {
+        max-width: 100%;
+        padding: 12px 18px;
+    }
 }
